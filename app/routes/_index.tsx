@@ -31,7 +31,9 @@ export const loader = async () => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const data = await request.json();
-  return data;
+  const parsedData = schema.safeParse(data);
+  if (!parsedData.success) return null;
+  return parsedData.data;
 };
 
 export default function () {
