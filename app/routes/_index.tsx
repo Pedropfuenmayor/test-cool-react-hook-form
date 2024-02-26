@@ -4,16 +4,28 @@ import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const schema = z.object({
-  firstName: z.string().min(5),
-  secondName: z.string().min(5),
-});
+const schema = z
+  .object({
+    firstName: z.string().min(3),
+    secondName: z.string().optional(),
+    secondNameRequired: z.boolean(),
+  })
+  .superRefine((schema, context) => {
+    if (schema.secondNameRequired && !schema.secondName) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["secondName"],
+        message: "Second name is required if the checkbox is checked",
+      });
+    }
+  });
 type Schema = z.infer<typeof schema>;
 
 export const loader = async () => {
   return {
     firstName: "loader",
     secondName: "data",
+    secondNameRequired: true,
   } satisfies Schema;
 };
 
@@ -37,11 +49,18 @@ export default function () {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        style={{ display: "flex", flexDirection: "column", width: "500px", gap: "5px" }}
+      >
         <input {...register("firstName")} />
         {errors.firstName && <span>{errors.firstName.message}</span>}
         <input {...register("secondName")} />
         {errors.secondName && <span>{errors.secondName.message}</span>}
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <label htmlFor="secondNameRequired">Second name required?</label>
+          <input id="secondNameRequired" type="checkbox" {...register("secondNameRequired")} />
+        </div>
         <button
           type="button"
           onClick={() => {
