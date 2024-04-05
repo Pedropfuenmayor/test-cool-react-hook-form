@@ -72,6 +72,14 @@ export default function () {
         >
           Set second name to first name
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            setValue("secondName", undefined);
+          }}
+        >
+          Set second name to undefined
+        </button>
         <input type="submit" />
       </form>
       <h2>Loader data</h2>
